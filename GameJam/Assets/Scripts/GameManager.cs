@@ -7,7 +7,7 @@ using TMPro;
 public class GameManager : MonoBehaviour
 {
     public TMP_Text TrueOrFalse1;
-    public TMP_Text FalseOrFalse2;
+    public TMP_Text TrueOrFalse2;
     public TMP_Text TrueOrFalse3;
     public TMP_Text Timer;
     public float timeRemaining = 60f;
