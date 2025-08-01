@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1061,6 +1061,7 @@ Transform:
   m_Father: {fileID: 741929000}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+<<<<<<< HEAD
 --- !u!1001 &1039827802
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1128,6 +1129,9 @@ Transform:
   m_PrefabInstance: {fileID: 1039827802}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1078268960
+=======
+--- !u!1 &1400150987
+>>>>>>> 0fc1516ba99d115e6e6404b608faa30130f10465
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1135,20 +1139,31 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+<<<<<<< HEAD
   - component: {fileID: 1078268961}
   m_Layer: 0
   m_Name: Building
+=======
+  - component: {fileID: 1400150988}
+  m_Layer: 0
+  m_Name: GameManager
+>>>>>>> 0fc1516ba99d115e6e6404b608faa30130f10465
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+<<<<<<< HEAD
 --- !u!4 &1078268961
+=======
+--- !u!4 &1400150988
+>>>>>>> 0fc1516ba99d115e6e6404b608faa30130f10465
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+<<<<<<< HEAD
   m_GameObject: {fileID: 1078268960}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -12.85207, y: 2.0729094, z: -1.1220033}
@@ -1582,3 +1597,14 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: c8fcb67cb3d648b4b87d500ece16b15f, type: 3}
   m_PrefabInstance: {fileID: 2146435446}
   m_PrefabAsset: {fileID: 0}
+=======
+  m_GameObject: {fileID: 1400150987}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+>>>>>>> 0fc1516ba99d115e6e6404b608faa30130f10465
