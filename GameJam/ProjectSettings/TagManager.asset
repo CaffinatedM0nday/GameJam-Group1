@@ -7,6 +7,10 @@ TagManager:
   - Red
   - Yellow
   - Green
+  - EasyPlatform
+  - MediumPlatform
+  - HardPlatform
+  - EndPlatform
   layers:
   - Default
   - TransparentFX
