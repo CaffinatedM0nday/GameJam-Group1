@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5954426916330200247}
   - component: {fileID: 5954426916325829671}
   m_Layer: 0
-  m_Name: Floor_B (3) Variant
+  m_Name: Yellow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -145,7 +145,7 @@ GameObject:
   - component: {fileID: 7394231322836401770}
   - component: {fileID: 7394231322840403706}
   m_Layer: 0
-  m_Name: Floor_B (1) Variant
+  m_Name: Red
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -243,7 +243,7 @@ GameObject:
   - component: {fileID: 8864972416206385067}
   - component: {fileID: 8864972416210493243}
   m_Layer: 0
-  m_Name: Floor_B (2) Variant
+  m_Name: Green
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
