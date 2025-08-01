@@ -7,7 +7,7 @@ public class PlayerMovement : MonoBehaviour
     Rigidbody rb;
     public float Movementspeed;
     public float JumpHeight;
-
+    public GameManager gameManager;
     public float rotationSpeed = 2f;
 
     void Start()
@@ -47,4 +47,17 @@ public class PlayerMovement : MonoBehaviour
         // Rotate player based on mouse movement
         transform.Rotate(Vector3.up, mouseX * rotationSpeed);
     }
+    public void FallToVoid()
+    {
+        // Add falling animation/effects here
+        Respawn(gameManager.checkpointPosition);
+    }
+
+    public void Respawn(Vector3 position)
+    {
+        transform.position = position;
+        rb.velocity = Vector3.zero;
+        gameManager.PlayerFell();
+    }
 }
+
