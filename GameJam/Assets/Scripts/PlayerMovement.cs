@@ -8,7 +8,7 @@ public class PlayerMovement : MonoBehaviour
     public float Movementspeed;
     public float JumpHeight;
 
-    
+    public float rotationSpeed = 2f;
 
     void Start()
     {
@@ -20,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     {
 
         Movement();
+        Rotation();
        
     }
 
@@ -36,5 +37,14 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.AddForce(Vector3.up * JumpHeight, ForceMode.Impulse);
         }
+    }
+
+    void Rotation()
+    {
+        // Get mouse movement
+        float mouseX = Input.GetAxis("Mouse X");
+
+        // Rotate player based on mouse movement
+        transform.Rotate(Vector3.up, mouseX * rotationSpeed);
     }
 }
