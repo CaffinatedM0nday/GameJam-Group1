@@ -333,7 +333,7 @@ GameObject:
   - component: {fileID: 195699187}
   - component: {fileID: 195699186}
   m_Layer: 5
-  m_Name: Button
+  m_Name: Restart
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -590,7 +590,7 @@ GameObject:
   - component: {fileID: 372841291}
   - component: {fileID: 372841290}
   m_Layer: 5
-  m_Name: Button
+  m_Name: Start
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1352,7 +1352,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -281, y: 185.99998}
+  m_AnchoredPosition: {x: -290, y: 190}
   m_SizeDelta: {x: -600, y: -400.4732}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &808143443
@@ -2560,8 +2560,8 @@ MonoBehaviour:
   startPanel: {fileID: 1959928164}
   gamePanel: {fileID: 808143441}
   gameOverPanel: {fileID: 1427609750}
-  timeRemaining: 60
+  timeRemaining: 10
   timerIsRunning: 0
-  timeText: {fileID: 0}
-  startButton: {fileID: 0}
-  restartButton: {fileID: 0}
+  timeText: {fileID: 1514663088}
+  startButton: {fileID: 372841290}
+  restartButton: {fileID: 195699186}
