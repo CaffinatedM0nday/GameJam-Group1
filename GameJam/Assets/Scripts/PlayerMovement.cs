@@ -8,8 +8,7 @@ public class PlayerMovement : MonoBehaviour
     public float Movementspeed;
     public float JumpHeight;
 
-    float Horizontal = Input.GetAxis("Horizontal");
-    float Vertical = Input.GetAxis("Vertical");
+    
 
     void Start()
     {
@@ -26,12 +25,13 @@ public class PlayerMovement : MonoBehaviour
 
     void Movement()
     {
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            Vector3 MovementDirection = new Vector3(Horizontal, 0, Vertical);
-            transform.Translate(MovementDirection * Time.deltaTime * Movementspeed);
-        }
+        float Horizontal = Input.GetAxis("Horizontal");
+        float Vertical = Input.GetAxis("Vertical");
 
+        Vector3 MovementDirection = new Vector3(Horizontal, 0, Vertical);
+        transform.Translate(MovementDirection * Time.deltaTime * Movementspeed);
+
+        // Jumping // 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             rb.AddForce(Vector3.up * JumpHeight, ForceMode.Impulse);
