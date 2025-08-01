@@ -1,49 +1,108 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public TMP_Text TrueOrFalse1;
-    public TMP_Text TrueOrFalse2;
-    public TMP_Text TrueOrFalse3;
-    public TMP_Text Timer;
+    [Header("UI Panels")]
+    public GameObject startPanel;
+    public GameObject gamePanel;
+    public GameObject gameOverPanel;
+
+    [Header("Timer Settings")]
     public float timeRemaining = 60f;
     public bool timerIsRunning = false;
-    // Start is called before the first frame update
-    void Start()
+    public TMP_Text timeText; // Changed to TMP_Text
+
+    [Header("Buttons")]
+    public Button startButton;
+    public Button restartButton;
+
+    private void Start()
     {
-        timerIsRunning = true;
+        // Set up button listeners
+        startButton.onClick.AddListener(StartGame);
+        restartButton.onClick.AddListener(RestartGame);
+
+        // Initialize UI
+        ShowStartScreen();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (timerIsRunning)
         {
             if (timeRemaining > 0)
             {
                 timeRemaining -= Time.deltaTime;
-                DisplayTime(timeRemaining);
+                UpdateTimerDisplay();
             }
             else
             {
-                Debug.Log("Time has run out!");
                 timeRemaining = 0;
                 timerIsRunning = false;
-                // You can add code here to execute when timer finishes
+                GameOver();
             }
         }
     }
-    void DisplayTime(float timeToDisplay)
+
+    void UpdateTimerDisplay()
     {
-        timeToDisplay += 1; // Add 1 to show the full second as it counts down
+        // Calculate minutes and seconds
+        int minutes = Mathf.FloorToInt(timeRemaining / 60);
+        int seconds = Mathf.FloorToInt(timeRemaining % 60);
 
-        float minutes = Mathf.FloorToInt(timeToDisplay / 60);
-        float seconds = Mathf.FloorToInt(timeToDisplay % 60);
+        // Update TMP text
+        timeText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+    }
 
-        Timer.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+    void ShowStartScreen()
+    {
+        startPanel.SetActive(true);
+        gamePanel.SetActive(false);
+        gameOverPanel.SetActive(false);
+        timerIsRunning = false;
+    }
+
+    public void StartGame()
+    {
+        // Reset timer
+        timeRemaining = 60f;
+        UpdateTimerDisplay();
+
+        // Switch panels
+        startPanel.SetActive(false);
+        gamePanel.SetActive(true);
+        gameOverPanel.SetActive(false);
+
+        // Start timer
+        timerIsRunning = true;
+
+        // Add your game initialization code here
+        Debug.Log("Game Started!");
+    }
+
+    public void GameOver()
+    {
+        timerIsRunning = false;
+        gamePanel.SetActive(false);
+        gameOverPanel.SetActive(true);
+
+        // Add your game over logic here
+        Debug.Log("Game Over!");
+    }
+
+    public void RestartGame()
+    {
+        // Option 1: Reload the scene (simpler)
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
+        // Option 2: Reset manually without reloading
+        /*
+        timeRemaining = 60f;
+        UpdateTimerDisplay();
+        ShowStartScreen();
+        */
     }
 }
