@@ -125,6 +125,7 @@ public class GameManager : MonoBehaviour
         ProcessPlatforms();
     }
 
+
     private void ProcessPlatforms()
     {
         // First, reset all platforms
@@ -272,6 +273,10 @@ public class GameManager : MonoBehaviour
             statementTexts[i].text = GenerateStatement(isTrue);
             statementTexts[i].color = isTrue ? Color.green : Color.red;
         }
+    }
+    public void RefreshStatements()
+    {
+        GeneratePuzzleRules();
     }
 
     private string GenerateStatement(bool isTrue)
