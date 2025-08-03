@@ -63,14 +63,6 @@ public class PlayerMovement : MonoBehaviour
     {
         canPassBarriers = false;
     }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (canPassBarriers && other.CompareTag("LevelBarrier"))
-        {
-            GameManager.Instance.OnBarrierPassed(other);
-        }
-    }
     public void Respawn(Vector3 position)
     {
         transform.position = position;

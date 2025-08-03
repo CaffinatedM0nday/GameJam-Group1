@@ -34,10 +34,6 @@ public class GameManager : MonoBehaviour
     public string hardFloorTag = "HardPlatform";
     public string endPlatformTag = "EndPlatform";
 
-    [Header("Level Transition")]
-    public Collider easyToMediumBarrier;
-    public Collider mediumToHardBarrier;
-
     // Game state
     private Dictionary<int, List<GameObject>> floorPlatformsCache = new Dictionary<int, List<GameObject>>();
     private List<GameObject> currentPlatforms = new List<GameObject>();
@@ -62,7 +58,7 @@ public class GameManager : MonoBehaviour
 
         ValidateReferences();
         CachePlatforms();
-        SetupBarriers();
+        
     }
 
     private void Start()
@@ -114,11 +110,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void SetupBarriers()
-    {
-        easyToMediumBarrier.enabled = (currentFloor == 0);
-        mediumToHardBarrier.enabled = (currentFloor == 1);
-    }
+    
 
     public void StartGame()
     {
@@ -189,13 +181,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private bool ShouldDisablePlatform(string platformColor, PlatformState state)
+    public bool ShouldDisablePlatform(string platformColor, PlatformState state)
     {
         return (state != null && !state.isSafe && !state.isDisabled &&
                !safeColors.Contains(platformColor));
     }
 
-    private IEnumerator DisablePlatformTemporarily(GameObject platform)
+    public IEnumerator DisablePlatformTemporarily(GameObject platform)
     {
         PlatformState state = platform.GetComponent<PlatformState>();
         if (state == null || state.isDisabled) yield break;
@@ -242,26 +234,11 @@ public class GameManager : MonoBehaviour
         isPlayerFalling = false;
     }
 
-    public void OnBarrierPassed(Collider barrier)
-    {
-        if (barrier == easyToMediumBarrier && currentFloor == 0)
-        {
-            AdvanceToNextFloor(1);
-        }
-        else if (barrier == mediumToHardBarrier && currentFloor == 1)
-        {
-            AdvanceToNextFloor(2);
-        }
-    }
-
     private void AdvanceToNextFloor(int newFloor)
     {
         currentFloor = newFloor;
         currentTime = levelTime;
         checkpointPosition = floorSpawnPoints[currentFloor].position;
-
-        easyToMediumBarrier.enabled = (currentFloor == 0);
-        mediumToHardBarrier.enabled = (currentFloor == 1);
 
         SetupFloor(currentFloor);
         player.Respawn(checkpointPosition);
