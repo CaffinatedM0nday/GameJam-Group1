@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
     public PlayerMovement player;
     public float falsePlatformReactivateTime = 2f;
     public float colorSimilarityThreshold = 0.2f;
+    private MeshCollider meshCollider;
 
     [Header("Platform Tags")]
     public string easyFloorTag = "EasyPlatform";
@@ -43,6 +44,7 @@ public class GameManager : MonoBehaviour
     public Vector3 checkpointPosition;
     private List<string> safeColors = new List<string>();
     private bool isPlayerFalling = false;
+
 
     private void Awake()
     {
@@ -66,6 +68,7 @@ public class GameManager : MonoBehaviour
         startButton.onClick.AddListener(StartGame);
         restartButton.onClick.AddListener(RestartGame);
         ShowStartScreen();
+        meshCollider = GetComponent<MeshCollider>();
     }
 
     private void Update()
@@ -170,14 +173,29 @@ public class GameManager : MonoBehaviour
 
         if (ShouldDisablePlatform(platformColor, state))
         {
-            StartCoroutine(DisablePlatformTemporarily(platform));
+            DisablePlatformCollider(platform); // Disable collider immediately
             PlayerFell();
             return;
         }
+    }
 
-        if (platform.CompareTag(endPlatformTag))
+    // New method: Disable the platform's collider
+    private void DisablePlatformCollider(GameObject platform)
+    {
+        // Try MeshCollider first, then fall back to any Collider
+        MeshCollider meshCollider = platform.GetComponent<MeshCollider>();
+        Collider anyCollider = meshCollider != null ? meshCollider : platform.GetComponent<Collider>();
+
+        if (anyCollider != null)
         {
-            player.EnableLevelTransition();
+            anyCollider.enabled = false;
+        }
+
+        // Update platform state
+        PlatformState state = platform.GetComponent<PlatformState>();
+        if (state != null)
+        {
+            state.isDisabled = true;
         }
     }
 
@@ -187,35 +205,7 @@ public class GameManager : MonoBehaviour
                !safeColors.Contains(platformColor));
     }
 
-    public IEnumerator DisablePlatformTemporarily(GameObject platform)
-    {
-        PlatformState state = platform.GetComponent<PlatformState>();
-        if (state == null || state.isDisabled) yield break;
-
-        state.isDisabled = true;
-
-        // Try to get MeshCollider first, then fall back to any Collider
-        MeshCollider meshCollider = platform.GetComponent<MeshCollider>();
-        Collider anyCollider = meshCollider != null ? meshCollider : platform.GetComponent<Collider>();
-
-        if (anyCollider != null) anyCollider.enabled = false;
-
-        Renderer renderer = platform.GetComponent<Renderer>();
-        if (renderer != null)
-        {
-            Color originalColor = renderer.material.color;
-            renderer.material.color = Color.gray;
-            yield return new WaitForSeconds(falsePlatformReactivateTime);
-            renderer.material.color = originalColor;
-        }
-        else
-        {
-            yield return new WaitForSeconds(falsePlatformReactivateTime);
-        }
-
-        if (anyCollider != null) anyCollider.enabled = true;
-        state.isDisabled = false;
-    }
+    
 
     public void PlayerFell()
     {
@@ -242,7 +232,7 @@ public class GameManager : MonoBehaviour
 
         SetupFloor(currentFloor);
         player.Respawn(checkpointPosition);
-        player.DisableLevelTransition();
+        
     }
 
     private void GeneratePuzzleRules()
