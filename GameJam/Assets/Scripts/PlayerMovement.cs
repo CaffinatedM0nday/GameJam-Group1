@@ -52,7 +52,25 @@ public class PlayerMovement : MonoBehaviour
         // Add falling animation/effects here
         Respawn(gameManager.checkpointPosition);
     }
+    private bool canPassBarriers = false;
 
+    public void EnableLevelTransition()
+    {
+        canPassBarriers = true;
+    }
+
+    public void DisableLevelTransition()
+    {
+        canPassBarriers = false;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (canPassBarriers && other.CompareTag("LevelBarrier"))
+        {
+            GameManager.Instance.OnBarrierPassed(other);
+        }
+    }
     public void Respawn(Vector3 position)
     {
         transform.position = position;

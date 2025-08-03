@@ -7,16 +7,19 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance;
+
     [Header("UI Elements")]
     public GameObject startPanel;
     public GameObject gamePanel;
     public GameObject gameOverPanel;
     public GameObject gameWinPanel;
-    public TMP_Text[] statementTexts; // 3 statements
+    public TMP_Text[] statementTexts;
     public TMP_Text timerText;
     public TMP_Text floorText;
     public Button startButton;
     public Button restartButton;
+    public Button nextLevelButton;
 
     [Header("Game Settings")]
     public float levelTime = 60f;
@@ -31,19 +34,35 @@ public class GameManager : MonoBehaviour
     public string hardFloorTag = "HardPlatform";
     public string endPlatformTag = "EndPlatform";
 
+    [Header("Level Transition")]
+    public Collider easyToMediumBarrier;
+    public Collider mediumToHardBarrier;
+
     // Game state
-    public Dictionary<int, List<GameObject>> floorPlatformsCache = new Dictionary<int, List<GameObject>>();
-    public List<GameObject> currentPlatforms = new List<GameObject>();
-    public float currentTime;
-    public bool gameRunning;
-    public int currentFloor = 0; // 0-Easy, 1-Medium, 2-Hard
+    private Dictionary<int, List<GameObject>> floorPlatformsCache = new Dictionary<int, List<GameObject>>();
+    private List<GameObject> currentPlatforms = new List<GameObject>();
+    private float currentTime;
+    private bool gameRunning;
+    private int currentFloor = 0;
     public Vector3 checkpointPosition;
-    public List<string> safeColors = new List<string>(); // Which colors are safe this level
+    private List<string> safeColors = new List<string>();
+    private bool isPlayerFalling = false;
 
     private void Awake()
     {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         ValidateReferences();
         CachePlatforms();
+        SetupBarriers();
     }
 
     private void Start()
@@ -81,11 +100,9 @@ public class GameManager : MonoBehaviour
         floorPlatformsCache[1] = new List<GameObject>(GameObject.FindGameObjectsWithTag(mediumFloorTag));
         floorPlatformsCache[2] = new List<GameObject>(GameObject.FindGameObjectsWithTag(hardFloorTag));
 
-        // Cache end platforms if they exist
         GameObject[] endPlatforms = GameObject.FindGameObjectsWithTag(endPlatformTag);
         foreach (var platform in endPlatforms)
         {
-            // Determine which floor this end platform belongs to
             for (int i = 0; i < 3; i++)
             {
                 if (Vector3.Distance(platform.transform.position, floorSpawnPoints[i].position) < 20f)
@@ -95,6 +112,12 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void SetupBarriers()
+    {
+        easyToMediumBarrier.enabled = (currentFloor == 0);
+        mediumToHardBarrier.enabled = (currentFloor == 1);
     }
 
     public void StartGame()
@@ -116,108 +139,60 @@ public class GameManager : MonoBehaviour
     private void SetupFloor(int floorLevel)
     {
         currentPlatforms = new List<GameObject>(floorPlatformsCache[floorLevel]);
-
-        // Generate puzzle rules and process platforms
         GeneratePuzzleRules();
         floorText.text = $"Floor: {(floorLevel == 0 ? "Easy" : floorLevel == 1 ? "Medium" : "Hard")}";
         ProcessPlatforms();
     }
 
-
     private void ProcessPlatforms()
     {
-        // First, reset all platforms
         foreach (var platform in currentPlatforms)
         {
-            Collider platformCollider = platform.GetComponent<Collider>();
-            if (platformCollider != null)
+            // Try to get MeshCollider first, then fall back to any Collider
+            MeshCollider meshCollider = platform.GetComponent<MeshCollider>();
+            Collider anyCollider = meshCollider != null ? meshCollider : platform.GetComponent<Collider>();
+
+            if (anyCollider != null)
             {
-                platformCollider.enabled = true;
+                anyCollider.enabled = true;
             }
 
-            // Reset platform state
             PlatformState state = platform.GetComponent<PlatformState>() ?? platform.AddComponent<PlatformState>();
             state.isDisabled = false;
-            state.isSafe = false;
-            platform.SetActive(true);
+            state.isSafe = IsPlatformSafe(platform);
         }
+    }
 
-        // Group platforms by color
-        Dictionary<string, List<GameObject>> colorGroups = new Dictionary<string, List<GameObject>>()
-        {
-            {"GREEN", new List<GameObject>()},
-            {"RED", new List<GameObject>()},
-            {"YELLOW", new List<GameObject>()}
-        };
+    private bool IsPlatformSafe(GameObject platform)
+    {
+        if (platform.CompareTag(endPlatformTag)) return true;
 
-        // Categorize platforms by color (skip end platform)
-        foreach (var platform in currentPlatforms)
-        {
-            if (platform.CompareTag(endPlatformTag)) continue;
-
-            string colorName = GetPlatformColor(platform);
-            if (colorGroups.ContainsKey(colorName))
-            {
-                colorGroups[colorName].Add(platform);
-            }
-        }
-
-        // Ensure at least one safe platform per color exists
-        foreach (var colorGroup in colorGroups)
-        {
-            if (colorGroup.Value.Count > 0)
-            {
-                // If this is a safe color, ensure at least one platform remains active
-                if (safeColors.Contains(colorGroup.Key))
-                {
-                    // Mark first platform as safe
-                    PlatformState state = colorGroup.Value[0].GetComponent<PlatformState>() ??
-                                       colorGroup.Value[0].AddComponent<PlatformState>();
-                    state.isSafe = true;
-                }
-                else
-                {
-                    // For unsafe colors, leave a small chance for one platform to be safe
-                    if (Random.Range(0f, 1f) < 0.2f) // 20% chance
-                    {
-                        PlatformState state = colorGroup.Value[0].GetComponent<PlatformState>() ??
-                                           colorGroup.Value[0].AddComponent<PlatformState>();
-                        state.isSafe = true;
-                    }
-                }
-            }
-        }
+        string platformColor = GetPlatformColor(platform);
+        return safeColors.Contains(platformColor);
     }
 
     public void OnPlatformLanded(GameObject platform)
     {
         PlatformState state = platform.GetComponent<PlatformState>();
+        string platformColor = GetPlatformColor(platform);
 
-        // Check if platform is false and not already disabled
-        if (state != null && !state.isSafe && !state.isDisabled)
+        if (ShouldDisablePlatform(platformColor, state))
         {
             StartCoroutine(DisablePlatformTemporarily(platform));
+            PlayerFell();
             return;
         }
 
-        // Check if this is the end platform
         if (platform.CompareTag(endPlatformTag))
         {
-            if (currentFloor < 2)
-            {
-                // Advance to next floor
-                currentFloor++;
-                currentTime = levelTime;
-                SetupFloor(currentFloor);
-                player.Respawn(floorSpawnPoints[currentFloor].position);
-                checkpointPosition = floorSpawnPoints[currentFloor].position;
-            }
-            else
-            {
-                // Won the game
-                GameWin();
-            }
+            player.EnableLevelTransition();
         }
+    }
+
+    private bool ShouldDisablePlatform(string platformColor, PlatformState state)
+    {
+        return (state != null && !state.isSafe && !state.isDisabled &&
+               !safeColors.Contains(platformColor));
     }
 
     private IEnumerator DisablePlatformTemporarily(GameObject platform)
@@ -226,10 +201,13 @@ public class GameManager : MonoBehaviour
         if (state == null || state.isDisabled) yield break;
 
         state.isDisabled = true;
-        Collider platformCollider = platform.GetComponent<Collider>();
-        if (platformCollider != null) platformCollider.enabled = false;
 
-        // Visual feedback
+        // Try to get MeshCollider first, then fall back to any Collider
+        MeshCollider meshCollider = platform.GetComponent<MeshCollider>();
+        Collider anyCollider = meshCollider != null ? meshCollider : platform.GetComponent<Collider>();
+
+        if (anyCollider != null) anyCollider.enabled = false;
+
         Renderer renderer = platform.GetComponent<Renderer>();
         if (renderer != null)
         {
@@ -243,19 +221,60 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(falsePlatformReactivateTime);
         }
 
-        if (platformCollider != null) platformCollider.enabled = true;
+        if (anyCollider != null) anyCollider.enabled = true;
         state.isDisabled = false;
+    }
+
+    public void PlayerFell()
+    {
+        if (isPlayerFalling) return;
+
+        isPlayerFalling = true;
+        currentTime -= Mathf.Max(2, 7 - currentFloor * 2);
+
+        StartCoroutine(RespawnPlayerAfterDelay(1f));
+    }
+
+    private IEnumerator RespawnPlayerAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        player.Respawn(checkpointPosition);
+        isPlayerFalling = false;
+    }
+
+    public void OnBarrierPassed(Collider barrier)
+    {
+        if (barrier == easyToMediumBarrier && currentFloor == 0)
+        {
+            AdvanceToNextFloor(1);
+        }
+        else if (barrier == mediumToHardBarrier && currentFloor == 1)
+        {
+            AdvanceToNextFloor(2);
+        }
+    }
+
+    private void AdvanceToNextFloor(int newFloor)
+    {
+        currentFloor = newFloor;
+        currentTime = levelTime;
+        checkpointPosition = floorSpawnPoints[currentFloor].position;
+
+        easyToMediumBarrier.enabled = (currentFloor == 0);
+        mediumToHardBarrier.enabled = (currentFloor == 1);
+
+        SetupFloor(currentFloor);
+        player.Respawn(checkpointPosition);
+        player.DisableLevelTransition();
     }
 
     private void GeneratePuzzleRules()
     {
         safeColors.Clear();
 
-        // Choose 1-2 safe colors (ensuring at least one)
-        int safeCount = Random.Range(1, 3); // 1 or 2 safe colors
+        int safeCount = Random.Range(1, 3);
         List<string> allColors = new List<string> { "GREEN", "RED", "YELLOW" };
 
-        // Select safe colors
         for (int i = 0; i < safeCount; i++)
         {
             int randomIndex = Random.Range(0, allColors.Count);
@@ -263,7 +282,6 @@ public class GameManager : MonoBehaviour
             allColors.RemoveAt(randomIndex);
         }
 
-        // Generate 3 statements (1 true, 2 false)
         int trueIndex = Random.Range(0, 3);
         for (int i = 0; i < 3; i++)
         {
@@ -272,16 +290,11 @@ public class GameManager : MonoBehaviour
             statementTexts[i].color = isTrue ? Color.green : Color.red;
         }
     }
-    public void RefreshStatements()
-    {
-        GeneratePuzzleRules();
-    }
 
     private string GenerateStatement(bool isTrue)
     {
         if (isTrue)
         {
-            // Generate true statement
             if (safeColors.Count == 1)
             {
                 return $"You CAN touch {safeColors[0]}";
@@ -293,7 +306,6 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // Generate false statement with failsafe
             string falseStatement;
             int attempts = 0;
 
@@ -302,26 +314,23 @@ public class GameManager : MonoBehaviour
                 attempts++;
                 if (attempts > 100)
                 {
-                    return $"You CAN touch {GetRandomColorExcept(safeColors)}"; // Fallback
+                    return $"You CAN touch {GetRandomColorExcept(safeColors)}";
                 }
 
                 int statementType = Random.Range(0, 3);
                 switch (statementType)
                 {
-                    case 0: // Wrong single color
+                    case 0:
                         falseStatement = $"You CAN touch {GetRandomColorExcept(safeColors)}";
                         break;
-
-                    case 1: // Wrong "can't" statement
+                    case 1:
                         falseStatement = $"You CAN'T touch {safeColors[Random.Range(0, safeColors.Count)]}";
                         break;
-
-                    case 2: // Wrong combination
+                    case 2:
                         string color1 = GetRandomColor();
                         string color2 = GetRandomColorExcept(new List<string> { color1 });
                         falseStatement = $"You CAN touch {color1} and {color2}";
                         break;
-
                     default:
                         falseStatement = $"You CAN touch {GetRandomColorExcept(safeColors)}";
                         break;
@@ -362,18 +371,12 @@ public class GameManager : MonoBehaviour
             if (IsColorSimilar(platformColor, Color.red)) return "RED";
             if (IsColorSimilar(platformColor, Color.yellow)) return "YELLOW";
         }
-        return "GREEN"; // Default
+        return "GREEN";
     }
 
     private bool IsColorSimilar(Color a, Color b)
     {
         return Vector4.Distance(a, b) < colorSimilarityThreshold;
-    }
-
-    public void PlayerFell()
-    {
-        player.Respawn(checkpointPosition);
-        currentTime -= Mathf.Max(2, 7 - currentFloor * 2); // 5s on easy, 3s on medium, 1s on hard
     }
 
     private void UpdateTimerDisplay()
@@ -424,5 +427,10 @@ public class GameManager : MonoBehaviour
     private void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void RefreshStatements()
+    {
+        GeneratePuzzleRules();
     }
 }
