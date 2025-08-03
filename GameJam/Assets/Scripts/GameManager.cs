@@ -89,8 +89,6 @@ public class GameManager : MonoBehaviour
         gamePanel.SetActive(true);
         gameOverPanel.SetActive(false);
         gameWinPanel.SetActive(false);
-<<<<<<< Updated upstream
-=======
 
         currentFloor = 0;
         currentTime = levelTime;
@@ -341,7 +339,7 @@ public class GameManager : MonoBehaviour
             available.Remove(color);
         }
         return available[Random.Range(0, available.Count)];
->>>>>>> Stashed changes
+
     }
 
     private void ShowStartScreen()
