@@ -6,47 +6,39 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using Unity.VisualScripting;
 
+// Main game manager class that controls game flow and logic
 public class GameManager : MonoBehaviour
 {
+    // Singleton pattern implementation
     public static GameManager Instance;
 
+    // UI Elements section
     [Header("UI Elements")]
-    public GameObject startPanel;
-    public GameObject gamePanel;
-    public GameObject gameOverPanel;
-    public GameObject gameWinPanel;
-    public TMP_Text[] statementTexts;
-    public TMP_Text timerText;
-    public TMP_Text floorText;
-    public Button startButton;
-    public Button restartButton;
-    public Button nextLevelButton;
+    public TMP_Text[] statementTexts;     // Text elements for puzzle statements
+    public TMP_Text timerText;            // Text element for timer display
 
+
+    // Game Settings section
     [Header("Game Settings")]
-    public float levelTime = 60f;
-    public Transform[] floorSpawnPoints; // [0]Easy, [1]Medium, [2]Hard
-    public PlayerMovement player;
-    public float falsePlatformReactivateTime = 2f;
-    public float colorSimilarityThreshold = 0.2f;
-    private MeshCollider meshCollider;
-
-    [Header("Platform Tags")]
-    public string easyFloorTag = "EasyPlatform";
-    public string mediumFloorTag = "MediumPlatform";
-    public string hardFloorTag = "HardPlatform";
-    public string endPlatformTag = "EndPlatform";
-
-    // Game state
-    private Dictionary<int, List<GameObject>> floorPlatformsCache = new Dictionary<int, List<GameObject>>();
-    private List<GameObject> currentPlatforms = new List<GameObject>();
-    private float currentTime;
-    private bool gameRunning;
-    private int currentFloor = 0;
-    public Vector3 checkpointPosition;
-    private List<string> safeColors = new List<string>();
-    private bool isPlayerFalling = false;
+    public float levelTime = 60f;                         // Total time per level
+    public Transform[] floorSpawnPoints;                  // Spawn points for each floor difficulty
+    public PlayerMovement player;                         // Reference to player object
+    public float falsePlatformReactivateTime = 2f;        // Time before false platforms reactivate
+    public float colorSimilarityThreshold = 0.2f;         // Threshold for color comparison
+    private MeshCollider meshCollider;                    // Reference to mesh collider
 
 
+    // Game state variables
+    private Dictionary<int, List<GameObject>> floorPlatformsCache = new Dictionary<int, List<GameObject>>(); // Cache for floor platforms
+    private List<GameObject> currentPlatforms = new List<GameObject>(); // Currently active platforms
+    private float currentTime;                            // Current remaining time
+    private bool gameRunning;                             // Flag indicating if game is running
+    private int currentFloor = 0;                         // Current floor level (0=easy, 1=medium, 2=hard)
+    public Vector3 checkpointPosition;                    // Player's respawn position
+    private List<string> safeColors = new List<string>(); // List of safe colors for current puzzle
+    private bool isPlayerFalling = false;                 // Flag to prevent multiple fall events
+
+    // Singleton initialization
     private void Awake()
     {
         if (Instance == null)
@@ -60,21 +52,25 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // Initial setup when game starts
     private void Start()
     {
-        startButton.onClick.AddListener(StartGame);
-        restartButton.onClick.AddListener(RestartGame);
+        // Show the start screen
         ShowStartScreen();
+
+        // Get reference to mesh collider
         meshCollider = GetComponent<MeshCollider>();
     }
 
+    // Main game loop
     private void Update()
     {
         if (gameRunning)
         {
+            // Update timer
             currentTime -= Time.deltaTime;
-            
 
+            // Check for game over condition
             if (currentTime <= 0)
             {
                 GameOver();
@@ -82,31 +78,38 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // Starts the game
     public void StartGame()
     {
-        startPanel.SetActive(false);
-        gamePanel.SetActive(true);
-        gameOverPanel.SetActive(false);
-        gameWinPanel.SetActive(false);
-
+        // Initialize game state
         currentFloor = 0;
         currentTime = levelTime;
         gameRunning = true;
 
+        // Set up first floor
         SetupFloor(currentFloor);
+
+        // Position player at spawn point
         player.Respawn(floorSpawnPoints[currentFloor].position);
+
+        // Set checkpoint to spawn point
         checkpointPosition = floorSpawnPoints[currentFloor].position;
-     
     }
 
+    // Sets up a specific floor level
     private void SetupFloor(int floorLevel)
     {
+        // Get platforms for this floor from cache
         currentPlatforms = new List<GameObject>(floorPlatformsCache[floorLevel]);
+
+        // Generate puzzle rules for this floor
         GeneratePuzzleRules();
-        floorText.text = $"Floor: {(floorLevel == 0 ? "Easy" : floorLevel == 1 ? "Medium" : "Hard")}";
+
+        // Process all platforms on this floor
         ProcessPlatforms();
     }
 
+    // Processes all platforms on current floor
     private void ProcessPlatforms()
     {
         foreach (var platform in currentPlatforms)
@@ -115,45 +118,53 @@ public class GameManager : MonoBehaviour
             MeshCollider meshCollider = platform.GetComponent<MeshCollider>();
             Collider anyCollider = meshCollider != null ? meshCollider : platform.GetComponent<Collider>();
 
+            // Enable collider if it exists
             if (anyCollider != null)
             {
                 anyCollider.enabled = true;
             }
 
+            // Get or add platform state component
             PlatformState state = platform.GetComponent<PlatformState>() ?? platform.AddComponent<PlatformState>();
             state.isDisabled = false;
             state.isSafe = IsPlatformSafe(platform);
         }
     }
 
+    // Checks if a platform is safe to land on
     private bool IsPlatformSafe(GameObject platform)
     {
-        if (platform.CompareTag(endPlatformTag)) return true;
+        // End platform is always safe
+        // if (platform.CompareTag()) return true;
 
+        // Check if platform color is in safe colors list
         string platformColor = GetPlatformColor(platform);
         return safeColors.Contains(platformColor);
     }
 
+    // Called when player lands on a platform
     public void OnPlatformLanded(GameObject platform)
     {
         PlatformState state = platform.GetComponent<PlatformState>();
         string platformColor = GetPlatformColor(platform);
 
+        // Check if platform should be disabled
         if (ShouldDisablePlatform(platformColor, state))
         {
             DisablePlatformCollider(platform); // Disable collider immediately
-            PlayerFell();
+            PlayerFell(); // Trigger fall sequence
             return;
         }
     }
 
-    // New method: Disable the platform's collider
+    // Disables a platform's collider
     private void DisablePlatformCollider(GameObject platform)
     {
         // Try MeshCollider first, then fall back to any Collider
         MeshCollider meshCollider = platform.GetComponent<MeshCollider>();
         Collider anyCollider = meshCollider != null ? meshCollider : platform.GetComponent<Collider>();
 
+        // Disable the collider if found
         if (anyCollider != null)
         {
             anyCollider.enabled = false;
@@ -167,24 +178,28 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // Determines if a platform should be disabled
     public bool ShouldDisablePlatform(string platformColor, PlatformState state)
     {
         return (state != null && !state.isSafe && !state.isDisabled &&
                !safeColors.Contains(platformColor));
     }
 
-    
-
+    // Handles player falling off platform
     public void PlayerFell()
     {
-        if (isPlayerFalling) return;
+        if (isPlayerFalling) return; // Prevent multiple fall events
 
         isPlayerFalling = true;
+
+        // Deduct time penalty based on floor level
         currentTime -= Mathf.Max(2, 7 - currentFloor * 2);
 
+        // Start respawn sequence
         StartCoroutine(RespawnPlayerAfterDelay(1f));
     }
 
+    // Coroutine to respawn player after delay
     private IEnumerator RespawnPlayerAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
@@ -192,24 +207,30 @@ public class GameManager : MonoBehaviour
         isPlayerFalling = false;
     }
 
+    // Advances player to next floor
     private void AdvanceToNextFloor(int newFloor)
     {
         currentFloor = newFloor;
         currentTime = levelTime;
         checkpointPosition = floorSpawnPoints[currentFloor].position;
 
+        // Set up new floor
         SetupFloor(currentFloor);
+
+        // Respawn player at new floor's spawn point
         player.Respawn(checkpointPosition);
-        
     }
 
+    // Generates puzzle rules for current floor
     private void GeneratePuzzleRules()
     {
         safeColors.Clear();
 
+        // Determine number of safe colors (1 or 2)
         int safeCount = Random.Range(1, 3);
         List<string> allColors = new List<string> { "GREEN", "RED", "YELLOW" };
 
+        // Randomly select safe colors
         for (int i = 0; i < safeCount; i++)
         {
             int randomIndex = Random.Range(0, allColors.Count);
@@ -217,6 +238,7 @@ public class GameManager : MonoBehaviour
             allColors.RemoveAt(randomIndex);
         }
 
+        // Generate statements (one true, others false)
         int trueIndex = Random.Range(0, 3);
         for (int i = 0; i < 3; i++)
         {
@@ -226,10 +248,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // Generates a puzzle statement (true or false)
     private string GenerateStatement(bool isTrue)
     {
         if (isTrue)
         {
+            // Generate true statement
             if (safeColors.Count == 1)
             {
                 return $"You CAN touch {safeColors[0]}";
@@ -241,9 +265,11 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            // Generate false statement
             string falseStatement;
             int attempts = 0;
 
+            // Keep trying until we get a valid false statement
             do
             {
                 attempts++;
@@ -252,6 +278,7 @@ public class GameManager : MonoBehaviour
                     return $"You CAN touch {GetRandomColorExcept(safeColors)}";
                 }
 
+                // Randomly select statement type
                 int statementType = Random.Range(0, 3);
                 switch (statementType)
                 {
@@ -276,6 +303,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // Checks if a statement is actually true (to avoid false statements that are true)
     private bool IsStatementActuallyTrue(string statement)
     {
         if (statement.Contains("CAN'T"))
@@ -295,6 +323,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // Gets the color of a platform
     private string GetPlatformColor(GameObject platform)
     {
         Renderer renderer = platform.GetComponent<Renderer>();
@@ -302,18 +331,21 @@ public class GameManager : MonoBehaviour
         {
             Color platformColor = renderer.material.color;
 
+            // Compare platform color to known colors
             if (IsColorSimilar(platformColor, Color.green)) return "GREEN";
             if (IsColorSimilar(platformColor, Color.red)) return "RED";
             if (IsColorSimilar(platformColor, Color.yellow)) return "YELLOW";
         }
-        return "GREEN";
+        return "GREEN"; // Default color
     }
 
+    // Compares two colors for similarity
     private bool IsColorSimilar(Color a, Color b)
     {
         return Vector4.Distance(a, b) < colorSimilarityThreshold;
     }
 
+    // Updates the timer display
     private void UpdateTimerDisplay()
     {
         int minutes = Mathf.FloorToInt(currentTime / 60);
@@ -321,12 +353,14 @@ public class GameManager : MonoBehaviour
         timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 
+    // Gets a random color
     private string GetRandomColor()
     {
         string[] colors = { "GREEN", "RED", "YELLOW" };
         return colors[Random.Range(0, colors.Length)];
     }
 
+    // Gets a random color excluding specified colors
     private string GetRandomColorExcept(List<string> excludedColors)
     {
         List<string> available = new List<string> { "GREEN", "RED", "YELLOW" };
@@ -335,42 +369,41 @@ public class GameManager : MonoBehaviour
             available.Remove(color);
         }
         return available[Random.Range(0, available.Count)];
-
     }
 
+    // Shows the start screen
     private void ShowStartScreen()
     {
-        startPanel.SetActive(true);
-        gamePanel.SetActive(false);
-        gameOverPanel.SetActive(false);
-        gameWinPanel.SetActive(false);
+        SceneManager.LoadScene("Start");
     }
 
+    // Handles game over
     private void GameOver()
     {
-        gameRunning = false;
-        gamePanel.SetActive(false);
-        gameOverPanel.SetActive(true);
+        SceneManager.LoadScene("Restart");
     }
 
+    // Handles game win
     private void GameWin()
     {
-        gameRunning = false;
-        gamePanel.SetActive(false);
-        gameWinPanel.SetActive(true);
+        SceneManager.LoadScene("Win");
     }
 
+    // Restarts the game
     private void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
+    // Refreshes puzzle statements (currently commented out)
     public void RefreshStatements()
     {
-        //GeneratePuzzleRules();
+        GeneratePuzzleRules();
     }
+
+    // Triggers win condition
     public void WinTrigger()
     {
-        GameWin();   
+        GameWin();
     }
 }
