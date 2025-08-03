@@ -17,7 +17,6 @@ public class GameManager : MonoBehaviour
     public TMP_Text floorText;
     public Button startButton;
     public Button restartButton;
-    public Button nextLevelButton;
 
     [Header("Game Settings")]
     public float levelTime = 60f;
@@ -51,7 +50,6 @@ public class GameManager : MonoBehaviour
     {
         startButton.onClick.AddListener(StartGame);
         restartButton.onClick.AddListener(RestartGame);
-        nextLevelButton.onClick.AddListener(NextLevel);
         ShowStartScreen();
     }
 
@@ -421,10 +419,5 @@ public class GameManager : MonoBehaviour
     private void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-    }
-
-    private void NextLevel()
-    {
-        RestartGame(); // Or load a specific next level
     }
 }
