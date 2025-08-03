@@ -410,4 +410,8 @@ public class GameManager : MonoBehaviour
     {
         GeneratePuzzleRules();
     }
+    public void WinTrigger()
+    {
+        GameWin();   
+    }
 }
