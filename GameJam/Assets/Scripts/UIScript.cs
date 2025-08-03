@@ -16,6 +16,11 @@ public class UIScript : MonoBehaviour
         SceneManager.LoadScene("GameJam");
     }
 
+    public void mainmenu()
+    {
+        SceneManager.LoadScene("Start");
+    }
+
     // Update is called once per frame
     void Update()
     {
