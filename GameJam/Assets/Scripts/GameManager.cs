@@ -9,7 +9,6 @@ using Unity.VisualScripting;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-    public AudioSource bgmAudio;
 
     [Header("UI Elements")]
     public GameObject startPanel;
@@ -97,10 +96,7 @@ public class GameManager : MonoBehaviour
         SetupFloor(currentFloor);
         player.Respawn(floorSpawnPoints[currentFloor].position);
         checkpointPosition = floorSpawnPoints[currentFloor].position;
-        if (bgmAudio != null && !bgmAudio.isPlaying)
-        {
-            bgmAudio.Play();
-        }
+     
     }
 
     private void SetupFloor(int floorLevel)
