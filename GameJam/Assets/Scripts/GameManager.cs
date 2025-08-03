@@ -56,7 +56,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         // Show the start screen
-        ShowStartScreen();
+       // ShowStartScreen();
 
         // Get reference to mesh collider
         meshCollider = GetComponent<MeshCollider>();
@@ -372,10 +372,10 @@ public class GameManager : MonoBehaviour
     }
 
     // Shows the start screen
-    private void ShowStartScreen()
-    {
-        SceneManager.LoadScene("Start");
-    }
+    //private void ShowStartScreen()
+    //{
+        //SceneManager.LoadScene("Start");
+    //}
 
     // Handles game over
     private void GameOver()
