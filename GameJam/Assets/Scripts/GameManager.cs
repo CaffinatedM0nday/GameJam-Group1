@@ -72,7 +72,7 @@ public class GameManager : MonoBehaviour
     {
         // Show the start screen
         // ShowStartScreen();
-
+        
         // Get reference to mesh collider
         meshCollider = GetComponent<MeshCollider>();
 
@@ -126,54 +126,59 @@ public class GameManager : MonoBehaviour
 
         }
     }
-    public void OnCollisionEnter(Collision collision)
-    {
+    //public void OnCollisionEnter(Collision collision)
+    //{
         // Check if the collision is with the player
-        if (collision.gameObject.CompareTag("Player"))
-        {
+        //if (collision.gameObject.CompareTag("Player"))
+        //{
             // Check which color platform was touched
-            if (gameObject.CompareTag("Red"))
-            {
-                FindObjectOfType<ColliderDisable>().DisablePlatform();
-                Debug.Log("Red platform disabled");
-            }
-            else if (gameObject.CompareTag("Yellow"))
-            {
-                FindObjectOfType<ColliderDisable>().DisablePlatform();
-                Debug.Log("Yellow platform disabled");
-            }
-            else if (gameObject.CompareTag("Green"))
-            {
-                FindObjectOfType<ColliderDisable>().DisablePlatform();
-                Debug.Log("Green platform disabled");
-            }
-        }
-    }
+            //if (gameObject.CompareTag("Red"))
+            //{
+                //FindObjectOfType<ColliderDisable>().DisablePlatform();
+                //Debug.Log("Red platform disabled");
+            //}
+            //else if (gameObject.CompareTag("Yellow"))
+            //{
+               // FindObjectOfType<ColliderDisable>().DisablePlatform();
+                //Debug.Log("Yellow platform disabled");
+            //}
+            //else if (gameObject.CompareTag("Green"))
+            //{
+                //FindObjectOfType<ColliderDisable>().DisablePlatform();
+                //Debug.Log("Green platform disabled");
+            //}
+        //}
+    //}
 
 
-    void TF1()
+    public void TF1()
     {
         /*make red be the only one correct*/
-        gameObject.CompareTag("Yellow");
-        {
-            FindObjectOfType<ColliderDisable>().DisablePlatform();
-            Debug.Log("Yellow platform disabled");
-        }
-        gameObject.CompareTag("Green");
-        {
-            FindObjectOfType<ColliderDisable>().DisablePlatform();
-            Debug.Log("Green platform disabled");
-        }
+        //gameObject.CompareTag("Yellow");
+        //{
+            //FindObjectOfType<ColliderDisable>().DisablePlatform();
+            //Debug.Log("Yellow platform disabled");
+        //}
+        //gameObject.CompareTag("Green");
+        //{
+            //FindObjectOfType<ColliderDisable>().DisablePlatform();
+            //Debug.Log("Green platform disabled");
+        //}
+
     }
-    void TF2() { /* ... */ }
-    void TF3() { /* ... */ }
-    void TF4() { /* ... */ }
-    void TF5() { /* ... */ }
-    void TF6() { /* ... */ }
-    void TF7() { /* ... */ }
-    void TF8() { /* ... */ }
-    void TF9() { /* ... */ }
-    void TF10() { /* ... */ }
+    public void TF2() 
+    {
+        /* ... */
+        
+    }
+    public void TF3() { /* ... */ }
+    public void TF4() { /* ... */ }
+    public void TF5() { /* ... */ }
+    public void TF6() { /* ... */ }
+    public void TF7() { /* ... */ }
+    public void TF8() { /* ... */ }
+    public void TF9() { /* ... */ }
+    public void TF10() { /* ... */ }
 
 
     // Main game loop
@@ -198,7 +203,7 @@ public class GameManager : MonoBehaviour
     }
 
     // Sets up a specific floor level
-    private void SetupFloor(int floorLevel)
+    public void SetupFloor(int floorLevel)
     {
         // Get platforms for this floor from cache
         currentPlatforms = new List<GameObject>(floorPlatformsCache[floorLevel]);
@@ -211,7 +216,7 @@ public class GameManager : MonoBehaviour
     }
 
     // Processes all platforms on current floor
-    private void ProcessPlatforms()
+    public void ProcessPlatforms()
     {
         foreach (var platform in currentPlatforms)
         {
