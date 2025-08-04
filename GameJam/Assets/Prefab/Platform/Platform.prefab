@@ -404,6 +404,7 @@ GameObject:
   - component: {fileID: 5954426916331298423}
   - component: {fileID: 5954426916330200247}
   - component: {fileID: 5954426916325829671}
+  - component: {fileID: 451856775724591987}
   m_Layer: 0
   m_Name: Yellow
   m_TagString: Yellow
@@ -492,6 +493,22 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: d557ab4a381fb044aa9e3ccc9981b24e, type: 3}
+--- !u!114 &451856775724591987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5954426916327932535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 338715aaddee736488c6ca0c52c70af7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerTag: Player
+  platform: {fileID: 0}
+  isDisabled: 0
+  isSafe: 0
 --- !u!1 &6641436516213744096
 GameObject:
   m_ObjectHideFlags: 0
