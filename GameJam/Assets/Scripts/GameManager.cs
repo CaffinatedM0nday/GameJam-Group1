@@ -71,7 +71,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         // Show the start screen
-       // ShowStartScreen();
+        // ShowStartScreen();
 
         // Get reference to mesh collider
         meshCollider = GetComponent<MeshCollider>();
@@ -93,6 +93,7 @@ public class GameManager : MonoBehaviour
         switch (currentState)
         {
             case PlatFormState.TF1:
+                //if {gameObject.CompareTag == "Green"} ;
                 TF1();
                 break;
             case PlatFormState.TF2:
@@ -125,8 +126,45 @@ public class GameManager : MonoBehaviour
 
         }
     }
+    public void OnCollisionEnter(Collision collision)
+    {
+        // Check if the collision is with the player
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            // Check which color platform was touched
+            if (gameObject.CompareTag("Red"))
+            {
+                FindObjectOfType<ColliderDisable>().DisablePlatform();
+                Debug.Log("Red platform disabled");
+            }
+            else if (gameObject.CompareTag("Yellow"))
+            {
+                FindObjectOfType<ColliderDisable>().DisablePlatform();
+                Debug.Log("Yellow platform disabled");
+            }
+            else if (gameObject.CompareTag("Green"))
+            {
+                FindObjectOfType<ColliderDisable>().DisablePlatform();
+                Debug.Log("Green platform disabled");
+            }
+        }
+    }
 
-    void TF1() { /* ... */ }
+
+    void TF1()
+    {
+        /*make red be the only one correct*/
+        gameObject.CompareTag("Yellow");
+        {
+            FindObjectOfType<ColliderDisable>().DisablePlatform();
+            Debug.Log("Yellow platform disabled");
+        }
+        gameObject.CompareTag("Green");
+        {
+            FindObjectOfType<ColliderDisable>().DisablePlatform();
+            Debug.Log("Green platform disabled");
+        }
+    }
     void TF2() { /* ... */ }
     void TF3() { /* ... */ }
     void TF4() { /* ... */ }
@@ -437,7 +475,7 @@ public class GameManager : MonoBehaviour
     // Shows the start screen
     //private void ShowStartScreen()
     //{
-        //SceneManager.LoadScene("Start");
+    //SceneManager.LoadScene("Start");
     //}
 
     // Handles game over
