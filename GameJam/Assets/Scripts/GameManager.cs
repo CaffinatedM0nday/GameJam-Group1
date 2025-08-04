@@ -5,6 +5,20 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using Unity.VisualScripting;
+public enum PlatFormState
+{
+    TF1,
+    TF2,
+    TF3,
+    TF4,
+    TF5,
+    TF6,
+    TF7,
+    TF8,
+    TF9,
+    TF10,
+
+}
 
 // Main game manager class that controls game flow and logic
 public class GameManager : MonoBehaviour
@@ -37,6 +51,7 @@ public class GameManager : MonoBehaviour
     public Vector3 checkpointPosition;                    // Player's respawn position
     private List<string> safeColors = new List<string>(); // List of safe colors for current puzzle
     private bool isPlayerFalling = false;                 // Flag to prevent multiple fall events
+    public PlatFormState currentState;
 
     // Singleton initialization
     private void Awake()
@@ -60,10 +75,9 @@ public class GameManager : MonoBehaviour
 
         // Get reference to mesh collider
         meshCollider = GetComponent<MeshCollider>();
-    }
 
-    // Main game loop
-    private void Update()
+    }
+    void Update()
     {
         if (gameRunning)
         {
@@ -76,7 +90,56 @@ public class GameManager : MonoBehaviour
                 GameOver();
             }
         }
+        switch (currentState)
+        {
+            case PlatFormState.TF1:
+                TF1();
+                break;
+            case PlatFormState.TF2:
+                TF2();
+                break;
+            case PlatFormState.TF3:
+                TF3();
+                break;
+            case PlatFormState.TF4:
+                TF4();
+                break;
+            case PlatFormState.TF5:
+                TF5();
+                break;
+            case PlatFormState.TF6:
+                TF6();
+                break;
+            case PlatFormState.TF7:
+                TF7();
+                break;
+            case PlatFormState.TF8:
+                TF8();
+                break;
+            case PlatFormState.TF9:
+                TF9();
+                break;
+            case PlatFormState.TF10:
+                TF10();
+                break;
+
+        }
     }
+
+    void TF1() { /* ... */ }
+    void TF2() { /* ... */ }
+    void TF3() { /* ... */ }
+    void TF4() { /* ... */ }
+    void TF5() { /* ... */ }
+    void TF6() { /* ... */ }
+    void TF7() { /* ... */ }
+    void TF8() { /* ... */ }
+    void TF9() { /* ... */ }
+    void TF10() { /* ... */ }
+
+
+    // Main game loop
+
 
     // Starts the game
     public void StartGame()
