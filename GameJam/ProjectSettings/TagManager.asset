@@ -7,13 +7,7 @@ TagManager:
   - Red
   - Yellow
   - Green
-  - EasyPlatform
-  - MediumPlatform
-  - HardPlatform
-  - EndPlatform
-  - Rule1
-  - Rule2
-  - Rule3
+  - Goal
   layers:
   - Default
   - TransparentFX
