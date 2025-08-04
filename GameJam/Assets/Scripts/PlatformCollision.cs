@@ -6,21 +6,20 @@ public class PlatformCollision : MonoBehaviour
 {
     [SerializeField] string playerTag = "Player";
     [SerializeField] Transform platform;
-    public bool isDisabled = false;
-    public bool isSafe = false;
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.tag.Equals(playerTag))
-        {
-            other.gameObject.transform.parent = platform;
-        }
 
-    }
-    private void OnTriggerExit(Collider other)
+    private void OnCollisionEnter(Collision collision)
     {
-        if (other.gameObject.tag.Equals(playerTag))
+        if (collision.gameObject.CompareTag(playerTag))
         {
-            other.gameObject.transform.parent = null;
+            collision.transform.SetParent(platform);
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag(playerTag))
+        {
+            collision.transform.SetParent(null);
         }
     }
 }
